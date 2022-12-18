@@ -15,18 +15,13 @@ class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: MainViewModel
+
 
     companion object {
         fun newInstance() = MainFragment()
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val factory = SavedStateViewModelFactory(activity?.application, this)
-        viewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
-    }
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,7 +33,7 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.application?.let {
+        activity?.application.let {
             val factory = SavedStateViewModelFactory(it, this)
             viewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
             val resultObserver = Observer<Float> { result ->
@@ -46,6 +41,7 @@ class MainFragment : Fragment() {
             }
             viewModel.getResult().observe(viewLifecycleOwner, resultObserver)
         }
+
         binding.convertButton.setOnClickListener {
             if (binding.dollarText.text.isNotEmpty()) {
                 viewModel.setAmount(binding.dollarText.text.toString())
@@ -58,6 +54,7 @@ class MainFragment : Fragment() {
             binding.dollarText.setText("")
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
