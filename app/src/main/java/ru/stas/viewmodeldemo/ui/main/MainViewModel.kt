@@ -1,25 +1,18 @@
 package ru.stas.viewmodeldemo.ui.main
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
-const val RESULT_KEY = "Euro Value"
-
-class MainViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
+class MainViewModel : ViewModel() {
 
     private val rate = 0.74f
     private var dollarText = ""
-    private var result: MutableLiveData<Float> =
-        savedStateHandle.getLiveData(RESULT_KEY)
+    private var result: Float = 0f
 
     fun setAmount(value: String){
         this.dollarText = value
-        val convertedValue = value.toFloat() * rate
-        result.value = convertedValue
-        savedStateHandle[RESULT_KEY] = convertedValue
+        result = value.toFloat() * rate
     }
-    fun getResult(): MutableLiveData<Float> {
+    fun getResult(): Float{
         return result
     }
 
