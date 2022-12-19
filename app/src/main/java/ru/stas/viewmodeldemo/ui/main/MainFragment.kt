@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import ru.stas.viewmodeldemo.R
 import ru.stas.viewmodeldemo.databinding.FragmentMainBinding
@@ -20,10 +23,6 @@ class MainFragment : Fragment() {
 
     private lateinit var viewModel: MainViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,22 +34,29 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        binding.resultText.text = viewModel.getResult().toString()
+        activity?.application.let {
+            val factory = SavedStateViewModelFactory(it, this)
+
+            viewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
+        }
+        val resultObserver = Observer<Float> { result ->
+            binding.resultText.text = result.toString()
+        }
+        viewModel.getResult().observe(viewLifecycleOwner, resultObserver)
 
         binding.convertButton.setOnClickListener {
-            if (binding.dollarText.text.isNotEmpty()) {
-                viewModel.setAmount(binding.dollarText.text.toString())
-                binding.resultText.text = viewModel.getResult().toString()
-            } else {
-                binding.resultText.text = getString(R.string.no_value)
+                if (binding.dollarText.text.isNotEmpty()) {
+                    viewModel.setAmount(binding.dollarText.text.toString())
+
+                } else {
+                    binding.resultText.text = getString(R.string.no_value)
+                }
+            }
+            binding.delResult.setOnClickListener {
+                binding.resultText.text = viewModel.cleanResult().toString()
+                binding.dollarText.setText("")
             }
         }
-        binding.delResult.setOnClickListener {
-            binding.resultText.text = viewModel.cleanResult().toString()
-            binding.dollarText.setText("")
-        }
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
